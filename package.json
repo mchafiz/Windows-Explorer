@@ -1,0 +1,10 @@
+{
+  "name": "windows-explorer",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "test": "bun run --filter '*' test",
+    "build": "bun run --filter '*' build"
+  }
+}
