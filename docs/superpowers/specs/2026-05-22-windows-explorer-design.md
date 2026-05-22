@@ -221,8 +221,8 @@ The use cases depend **only on port interfaces**, never on Prisma or Elysia. Thi
 ExplorerView.vue
 ├── SearchBar.vue              # debounced input, emits search event
 ├── FolderTree.vue             # virtualised scrollable left panel
-│   └── FolderNode.vue         # single row: indent + ▶/▼ + name
-│       └── (recursive via depth prop, not recursive component)
+│   └── FolderNode.vue         # single flat row: depth prop drives indent, ▶/▼ arrow, name
+│                              # (NOT a recursive component — FolderTree maps over flatVisible[])
 └── ContentPanel.vue           # right panel
     ├── BreadcrumbBar.vue      # path of selected folder
     ├── FolderGrid.vue         # grid of subfolder cards
@@ -286,7 +286,8 @@ const flatVisible = computed(() => {
 state: {
   folders: FolderDto[]          // all folders, flat
   selectedFolderId: string | null
-  childrenMap: Map<string, { folders: FolderDto[]; files: FileDto[] }>
+  // Record not Map — Pinia tracks plain objects reactively; Map mutations are not observed
+  childrenMap: Record<string, { folders: FolderDto[]; files: FileDto[] }>
   loading: boolean
   error: string | null
 }
