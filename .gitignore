@@ -5,3 +5,8 @@ node_modules/
 dist/
 .superpowers/
 *.log
+*.tsbuildinfo
+# vue-tsc emitted JS (type-check only, not build output)
+apps/frontend/src/**/*.js
+apps/frontend/src/**/*.vue.js
+apps/frontend/tests/**/*.js
