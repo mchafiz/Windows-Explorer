@@ -4,7 +4,10 @@ Reimplementasi Windows Explorer di browser: split-panel UI, folder tree dengan v
 
 Dibuat sebagai studi kasus arsitektur hexagonal dengan Bun + Elysia + Prisma di backend, dan Vue 3 SPA di frontend tanpa library tree eksternal.
 
-![Screenshot](docs/screenshots/explorer-main.png)
+![Screenshot 1](docs/screenshots/screenshot-1.png)
+![Screenshot 2](docs/screenshots/screenshot-2.png)
+![Screenshot 3](docs/screenshots/screenshot-3.png)
+![Screenshot 4](docs/screenshots/screenshot-4.png)
 
 ---
 
