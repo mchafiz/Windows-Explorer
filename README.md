@@ -189,6 +189,14 @@ Hapus folder otomatis cascade ke subfolder dan file di dalamnya — ditangani Po
 
 ![Flow upload file](docs/screenshots/flow-upload.png)
 
+**User ketik di search bar**
+
+![Flow search](docs/screenshots/flow-search.png)
+
+**Cache lifecycle — sebelum dan sesudah mutasi folder**
+
+![Flow cache](docs/screenshots/flow-cache.png)
+
 ---
 
 ## API

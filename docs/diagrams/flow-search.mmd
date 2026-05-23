@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant User
+    participant SearchBar as SearchBar.vue
+    participant useSearch as useSearch composable
+    participant Service as folderService
+    participant API as Elysia API
+    participant DB as PostgreSQL (pg_trgm)
+
+    User->>SearchBar: ketik karakter
+    SearchBar->>useSearch: query.value = "..."
+    useSearch->>useSearch: clearTimeout(timer)
+    Note over useSearch: reset timer setiap keystroke
+
+    User->>SearchBar: berhenti mengetik (300ms berlalu)
+    useSearch->>useSearch: setTimeout fires
+    useSearch->>Service: search(query, "all")
+    Service->>API: GET /api/v1/search?q=...&type=all
+
+    API->>DB: Promise.all([
+    Note over API,DB: folderRepo.searchByName(q) — ILIKE %q% (GIN index)
+    Note over API,DB: fileRepo.searchByName(q)   — ILIKE %q% (GIN index)
+    DB-->>API: folders[] + files[] (max 50 each)
+
+    API-->>Service: { folders, files, meta }
+    Service-->>useSearch: SearchResultData
+    useSearch-->>SearchBar: results.value = data
+    SearchBar-->>User: tampilkan hasil di content panel

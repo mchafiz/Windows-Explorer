@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant Store as Pinia Store
+    participant API as Elysia API
+    participant Cache as InMemoryCache
+    participant DB as PostgreSQL
+
+    Note over Store,DB: Pertama kali app dibuka — cache kosong
+    Store->>API: GET /api/v1/folders
+    API->>Cache: get("all-folders")
+    Cache-->>API: null (miss)
+    API->>DB: SELECT * FROM folders
+    DB-->>API: rows
+    API->>Cache: set("all-folders", data, ttl=30s)
+    API-->>Store: FolderDto[]
+
+    Note over Store,DB: Request kedua dalam 30 detik
+    Store->>API: GET /api/v1/folders
+    API->>Cache: get("all-folders")
+    Cache-->>API: FolderDto[] (hit — skip DB)
+    API-->>Store: FolderDto[]
+
+    Note over Store,DB: User buat / rename / pindah / hapus folder
+    Store->>API: POST /api/v1/folders (atau PATCH / DELETE)
+    API->>Cache: invalidate("all-folders")
+    API->>DB: INSERT / UPDATE / DELETE
+    DB-->>API: hasil mutasi
+    API-->>Store: FolderDto (data terbaru)
+    Store->>Store: update state lokal langsung
+
+    Note over Store,DB: Request berikutnya — cache sudah kosong lagi
+    Store->>API: GET /api/v1/folders
+    API->>Cache: get("all-folders")
+    Cache-->>API: null (miss — refetch fresh)
+    API->>DB: SELECT * FROM folders
+    DB-->>API: rows (termasuk perubahan terbaru)
+    API->>Cache: set("all-folders", data, ttl=30s)
+    API-->>Store: FolderDto[]
