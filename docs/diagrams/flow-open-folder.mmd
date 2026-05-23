@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant Browser
+    participant Store as Pinia Store
+    participant API as Elysia API
+    participant Cache as InMemoryCache
+    participant DB as PostgreSQL
+
+    Browser->>Store: fetchAll()
+    Store->>API: GET /api/v1/folders
+    API->>Cache: get("all-folders")
+    alt cache hit (TTL 30s)
+        Cache-->>API: FolderDto[]
+    else cache miss
+        API->>DB: SELECT * FROM folders ORDER BY name
+        DB-->>API: rows
+        API->>Cache: set("all-folders", ttl=30s)
+    end
+    API-->>Store: FolderDto[]
+    Store->>Store: buildTree() — O(n) Map, dua pass
+    Store-->>Browser: treeRoots computed
+
+    Browser->>Store: selectFolder(id)
+    alt childrenMap[id] sudah ada
+        Store-->>Browser: tampilkan dari cache lokal
+    else belum ada
+        Store->>API: GET /api/v1/folders/:id/children
+        API->>DB: Promise.all — WHERE parent_id=id & WHERE folder_id=id
+        DB-->>API: folders + files
+        API-->>Store: { folders, files }
+        Store->>Store: childrenMap[id] = result
+        Store-->>Browser: update URL ke /folder/:id
+    end

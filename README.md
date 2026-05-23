@@ -36,6 +36,15 @@ Dibuat sebagai studi kasus arsitektur: hexagonal backend (Bun + Elysia + Prisma)
 
 ---
 
+## Gambaran Sistem
+
+![Architecture](docs/screenshots/arch.png)
+
+> Domain layer tidak tahu apa-apa tentang Elysia, Prisma, atau PostgreSQL.
+> Application layer hanya bicara lewat port interface — implementasinya bisa diganti tanpa menyentuh use case.
+
+---
+
 ## Arsitektur Backend
 
 Backend mengikuti pola **Hexagonal Architecture** (Ports & Adapters) — tiga layer yang tidak saling bergantung kecuali lewat interface:
@@ -174,45 +183,11 @@ Hapus folder otomatis cascade ke subfolder dan file di dalamnya — ditangani Po
 
 **User buka folder → klik folder di tree → content panel update**
 
-```
-[Browser]
-  │
-  ├─ App mount → store.fetchAll()
-  │               └─ GET /api/v1/folders
-  │                    └─ GetFolderTree.execute()
-  │                         ├─ cache hit?  → return langsung (TTL 30s)
-  │                         └─ cache miss → PrismaFolderRepository.findAll()
-  │                                          └─ SELECT * FROM folders ORDER BY name
-  │                              └─ simpan ke cache, return flat array
-  │                    └─ buildTree() di client → O(n) Map, dua pass
-  │
-  └─ User klik folder di sidebar
-       └─ store.selectFolder(id)
-            ├─ childrenMap[id] ada? → tampilkan langsung
-            └─ belum ada → GET /api/v1/folders/:id/children
-                            └─ GetFolderChildren.execute(id)
-                                 └─ Promise.all([
-                                      folderRepo.findChildren(id),  → WHERE parent_id = $id
-                                      fileRepo.findByFolderId(id)   → WHERE folder_id = $id
-                                    ])
-                            └─ simpan ke childrenMap[id]
-                            └─ URL update ke /folder/:id
-```
+![Flow buka folder](docs/screenshots/flow-open-folder.png)
 
 **User upload file**
 
-```
-[Browser]
-  └─ User pilih file → folderService.uploadFile(folderId, file)
-       └─ POST /api/v1/files/upload (multipart/form-data)
-            └─ MutateFile.upload()
-                 ├─ validasi folder ada
-                 ├─ tulis file ke disk: uploads/<uuid>.<ext>
-                 └─ simpan record ke DB (nama asli di name, uuid di storage_path)
-            └─ return FileDto
-       └─ store update childrenMap[folderId] lokal — tanpa re-fetch
-       └─ Toast "Uploaded ..."
-```
+![Flow upload file](docs/screenshots/flow-upload.png)
 
 ---
 

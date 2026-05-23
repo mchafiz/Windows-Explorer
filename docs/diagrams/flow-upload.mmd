@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant Browser
+    participant Store as Pinia Store
+    participant API as Elysia API
+    participant Disk as File System
+    participant DB as PostgreSQL
+
+    Browser->>API: POST /api/v1/files/upload (multipart/form-data)
+    API->>API: validasi folder ada
+    API->>Disk: tulis uploads/<uuid>.<ext>
+    API->>DB: INSERT INTO files (name=asli, storage_path=uuid, ...)
+    DB-->>API: FileDto
+    API-->>Store: FileDto
+    Store->>Store: update childrenMap[folderId] lokal
+    Store-->>Browser: Toast "Uploaded ..."

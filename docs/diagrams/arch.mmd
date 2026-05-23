@@ -1,0 +1,16 @@
+graph TD
+    FE["Frontend<br/>Vue 3 + Pinia"]
+    HTTP["HTTP Layer<br/>Elysia Routes"]
+    APP["Application Layer<br/>Use Cases"]
+    DOMAIN["Domain Layer<br/>Entities + Port Interfaces"]
+    INFRA["Infrastructure<br/>Prisma Repositories + Cache"]
+    DB[("PostgreSQL")]
+    DISK["📁 uploads/"]
+
+    FE -->|"REST API"| HTTP
+    HTTP --> APP
+    APP -->|"via port interface"| INFRA
+    INFRA -.->|"implements"| DOMAIN
+    APP -.->|"depends on"| DOMAIN
+    INFRA --> DB
+    INFRA --> DISK
